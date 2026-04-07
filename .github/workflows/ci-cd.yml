@@ -15,12 +15,12 @@ jobs:
   # Déclencheur : push sur n'importe quelle branche (hors main)
   # ──────────────────────────────────────────────
   unit-tests:
-    name: 🧪 Tests unitaires
+    name:  Tests unitaires
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]   # BONUS : matrice multi-versions Node.js
+        node-version: [18.x, 20.x, 22.x]   # matrice multi-versions Node.js
 
     steps:
       - name: Checkout du code
@@ -43,7 +43,7 @@ jobs:
   # Déclencheur : uniquement sur PR vers main
   # ──────────────────────────────────────────────
   static-analysis:
-    name: 🔍 Analyse statique du code
+    name:  Analyse statique du code
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
 
@@ -79,7 +79,7 @@ jobs:
   # Déclencheur : uniquement sur PR vers main
   # ──────────────────────────────────────────────
   security-scan-pr:
-    name: 🛡️ Scan de sécurité (PR)
+    name:  Scan de sécurité (PR)
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
 
@@ -103,7 +103,7 @@ jobs:
   # On simule le "merge dans main" via un push direct sur main
   # ──────────────────────────────────────────────
   full-pipeline:
-    name: 🚀 Pipeline complet (build + Docker)
+    name:  Pipeline complet (build + Docker)
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
@@ -120,26 +120,26 @@ jobs:
       - name: Installation des dépendances
         run: npm ci
 
-      # ── Tests unitaires ──
+      # Tests unitaires
       - name: Exécution des tests unitaires
         run: npm test
 
-      # ── Analyse statique ──
+      # Analyse statique
       - name: Analyse ESLint
         run: npm run lint || true
 
-      # ── BONUS : Hadolint (lint Dockerfile) ──
+      # BONUS : Hadolint (lint Dockerfile)
       - name: Analyse Hadolint du Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: Dockerfile
         continue-on-error: true
 
-      # ── Build de l'application ──
+      # Build de l'application
       - name: Build de l'application
         run: npm run build --if-present
 
-      # ── Build image Docker ──
+      # Build image Docker
       - name: Connexion à Docker Hub
         uses: docker/login-action@v3
         with:
@@ -164,14 +164,14 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      # ── Affichage du checksum (digest) de l'image ──
+      # Affichage du checksum (digest) de l'image
       - name: Affichage du digest de l'image Docker
         run: |
-          echo "✅ Image poussée avec succès !"
-          echo "📦 Digest (checksum) : ${{ steps.docker-build.outputs.digest }}"
-          echo "🏷️  Tags : ${{ steps.meta.outputs.tags }}"
+          echo " Image poussée avec succès !"
+          echo " Digest (checksum) : ${{ steps.docker-build.outputs.digest }}"
+          echo "  Tags : ${{ steps.meta.outputs.tags }}"
 
-      # ── BONUS : Trivy sur l'image Docker construite ──
+      # BONUS : Trivy sur l'image Docker construite
       - name: Scan de sécurité Trivy sur l'image Docker
         uses: aquasecurity/trivy-action@master
         with:
