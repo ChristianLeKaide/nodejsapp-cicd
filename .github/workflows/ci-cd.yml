@@ -68,7 +68,7 @@ jobs:
             p/owasp-top-ten
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-        continue-on-error: true   # non bloquant si token absent
+        continue-on-error: true   # non bloquant si token absent ou si SEMGREP rencontre un probleme
 
   # JOB 3 : Scan de sécurité (Trivy)
   # Déclencheur : uniquement sur PR vers main
@@ -81,7 +81,7 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
-      # BONUS : Trivy sur le système de fichiers (avant build Docker)
+      # Trivy sur le système de fichiers (avant build Docker)
       - name: Scan Trivy sur le code source
         uses: aquasecurity/trivy-action@master
         with:
@@ -90,6 +90,7 @@ jobs:
           format: 'table'
           exit-code: '0'            # 0 = non bloquant, mettre 1 pour bloquer
           severity: 'CRITICAL,HIGH'
+          
 
   # JOB 4 : Pipeline complet (build + Docker + push)
   # Déclencheur : merge dans main (push sur main)
@@ -163,7 +164,7 @@ jobs:
           echo " Digest (checksum) : ${{ steps.docker-build.outputs.digest }}"
           echo "  Tags : ${{ steps.meta.outputs.tags }}"
 
-      # BONUS : Trivy sur l'image Docker construite
+      # Trivy sur l'image Docker construite
       - name: Scan de sécurité Trivy sur l'image Docker
         uses: aquasecurity/trivy-action@master
         with:
