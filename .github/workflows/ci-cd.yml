@@ -10,10 +10,8 @@ on:
 
 jobs:
 
-  # ──────────────────────────────────────────────
   # JOB 1 : Tests unitaires
   # Déclencheur : push sur n'importe quelle branche (hors main)
-  # ──────────────────────────────────────────────
   unit-tests:
     name:  Tests unitaires
     runs-on: ubuntu-latest
@@ -38,10 +36,8 @@ jobs:
       - name: Exécution des tests unitaires
         run: npm test
 
-  # ──────────────────────────────────────────────
   # JOB 2 : Analyse statique du code (ESLint + Semgrep)
   # Déclencheur : uniquement sur PR vers main
-  # ──────────────────────────────────────────────
   static-analysis:
     name:  Analyse statique du code
     runs-on: ubuntu-latest
@@ -63,7 +59,7 @@ jobs:
       - name: Analyse ESLint
         run: npm run lint || true   # ne bloque pas si eslint n'est pas configuré
 
-      # BONUS : Semgrep
+      # Semgrep
       - name: Analyse Semgrep
         uses: semgrep/semgrep-action@v1
         with:
@@ -72,12 +68,10 @@ jobs:
             p/owasp-top-ten
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-        continue-on-error: true   # non bloquant si token absent
+        continue-on-error: true   # non bloquant si token absent ou si SEMGREP rencontre un probleme
 
-  # ──────────────────────────────────────────────
   # JOB 3 : Scan de sécurité (Trivy)
   # Déclencheur : uniquement sur PR vers main
-  # ──────────────────────────────────────────────
   security-scan-pr:
     name:  Scan de sécurité (PR)
     runs-on: ubuntu-latest
@@ -87,7 +81,7 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
-      # BONUS : Trivy sur le système de fichiers (avant build Docker)
+      # Trivy sur le système de fichiers (avant build Docker)
       - name: Scan Trivy sur le code source
         uses: aquasecurity/trivy-action@master
         with:
@@ -96,12 +90,11 @@ jobs:
           format: 'table'
           exit-code: '0'            # 0 = non bloquant, mettre 1 pour bloquer
           severity: 'CRITICAL,HIGH'
+          
 
-  # ──────────────────────────────────────────────
   # JOB 4 : Pipeline complet (build + Docker + push)
   # Déclencheur : merge dans main (push sur main)
   # On simule le "merge dans main" via un push direct sur main
-  # ──────────────────────────────────────────────
   full-pipeline:
     name:  Pipeline complet (build + Docker)
     runs-on: ubuntu-latest
@@ -128,7 +121,7 @@ jobs:
       - name: Analyse ESLint
         run: npm run lint || true
 
-      # BONUS : Hadolint (lint Dockerfile)
+      # Hadolint (lint Dockerfile)
       - name: Analyse Hadolint du Dockerfile
         uses: hadolint/hadolint-action@v3.1.0
         with:
@@ -171,7 +164,7 @@ jobs:
           echo " Digest (checksum) : ${{ steps.docker-build.outputs.digest }}"
           echo "  Tags : ${{ steps.meta.outputs.tags }}"
 
-      # BONUS : Trivy sur l'image Docker construite
+      # Trivy sur l'image Docker construite
       - name: Scan de sécurité Trivy sur l'image Docker
         uses: aquasecurity/trivy-action@master
         with:
